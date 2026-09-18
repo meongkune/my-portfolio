@@ -17,14 +17,16 @@
   --accent: #4a6b8a;
   --accent-press: #35506b;
   --accent-soft: #e9eef4;
-  /* 회색 5단계 — 전부 푸른기를 섞은 실버 */
+  /* 회색 5단계 — 전부 푸른기를 섞은 실버.
+     gray-4 는 '흐린 글씨' 전용입니다. 여기를 너무 밝게 잡으면 화면이
+     통째로 읽히지 않습니다 — 본문 대비 4.5:1 을 넘기도록 어둡게 유지합니다. */
   --gray-0: #ffffff;
-  --gray-1: #fafbfc;
-  --gray-2: #eef1f5;
-  --gray-3: #dfe4ea;
-  --gray-4: #8793a3;
-  --gray-5: #49566a;
-  --text: #1b2330;
+  --gray-1: #f7f9fb;
+  --gray-2: #eff2f6;
+  --gray-3: #dde3ea;
+  --gray-4: #63707f;
+  --gray-5: #3d4959;
+  --text: #141b26;
   /* 금속 광택 — 포인트에만 씁니다 */
   --metal: linear-gradient(145deg, #f7f9fb 0%, #dfe4ea 45%, #eef1f5 55%, #cdd5de 100%);
   --metal-accent: linear-gradient(145deg, #5c7f9f 0%, #3d5c79 48%, #4a6b8a 52%, #2f4a63 100%);
@@ -54,8 +56,9 @@
   --ev0: #f04452; --ev1: #3182f6; --ev2: #8b5cf6; --ev3: #0891b2; --ev4: #ea580c; --ev5: #0f8a5f; --ev6: #8b95a1;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+/* 다크는 이제 사용자가 직접 고를 때만 켜집니다. OS 설정은 따르지 않습니다 —
+   기본이 어두우면 "밝게 보고 싶다"는 요구를 앱이 매번 배신하게 됩니다. */
+:root[data-theme="dark"] {
     /* 다크에서도 회색에 푸른기를 유지합니다 — 중성 회색이 되면 금속 느낌이 사라집니다 */
     --accent: #7ba3c7; --accent-press: #9dbcd8; --accent-soft: #1e2b38;
     --gray-0: #1c2129; --gray-1: #232932; --gray-2: #232932; --gray-3: #353d49; --gray-4: #94a0b0; --gray-5: #c3cbd6;
@@ -71,7 +74,6 @@
     --sh-card: none; --sh-btn: none; --sh-up: 0 4px 12px rgba(0, 0, 0, .4); --sh-modal: 0 8px 24px rgba(0, 0, 0, .5);
     --ev0: #ff5c5c; --ev1: #4593fc; --ev2: #b69cf0; --ev3: #5cc6d8; --ev4: #f0a36b; --ev5: #8fbf9a; --ev6: #9aa0a6;
     color-scheme: dark;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -267,6 +269,20 @@ tfoot th, tfoot td { border-bottom: 0; font-weight: 700; }
 .stat-num.hot { color: var(--warn); }
 .stat-label { font-size: 12px; color: var(--gray-4); font-weight: 600; }
 @media (max-width: 640px) { .stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .stat { padding: 12px 12px; } .stat-num { font-size: 22px; } }
+
+/* ---------- 접히는 이력서 섹션 ----------
+   접힌 것은 카드가 아니라 '목록의 한 줄'처럼 보여야 합니다. 접혀 있는데도
+   흰 카드로 떠 있으면 접은 의미가 없습니다. */
+.sec > summary { cursor: pointer; list-style: none; margin-bottom: 0; }
+.sec > summary::-webkit-details-marker { display: none; }
+.sec[open] > summary { margin-bottom: 12px; }
+.sec:not([open]) { background: transparent; box-shadow: none; padding: 2px 22px; }
+.sec:not([open]):hover { background: var(--surface); }
+.sec:not([open]) h3 { color: var(--gray-4); font-weight: 600; }
+.sec-count { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 1px 7px; margin-left: 6px; }
+.sec-mark { flex: none; width: 8px; height: 8px; border-right: 1.5px solid var(--gray-4); border-bottom: 1.5px solid var(--gray-4); transform: rotate(45deg); transition: transform var(--t); margin-right: 4px; }
+.sec[open] .sec-mark { transform: rotate(-135deg); }
+.sec-add { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 
 .plain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .plain-list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; border-top: 1px solid var(--gray-2); }

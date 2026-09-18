@@ -487,13 +487,18 @@ function rsCustomHTML(r, key) {
 function rsSectionHTML(sec, r) {
   const rows = r[sec.key];
   const tag = sec.required ? `<span class="chip accent">필수</span>` : "";
+  /* 아홉 개 섹션이 전부 펼쳐져 있으면 대부분 빈 카드인데도 화면을 다 먹습니다.
+     내용이 있거나 필수인 것만 펼치고, 빈 선택 항목은 한 줄로 접어 둡니다.
+     <details> 를 쓰면 접힘 상태가 브라우저 기본 동작으로 처리돼 별도 상태가 필요 없습니다. */
+  const open = sec.required || rows.length > 0;
   return `
-  <section class="card" id="sec-${sec.key}">
-    <div class="card-head">
-      <h3>${esc(sec.title)} ${tag}</h3>
-      <button class="btn btn-sm" type="button" data-act="rs-add" data-sec="${sec.key}">+ 추가</button>
-    </div>
+  <details class="card sec" id="sec-${sec.key}" ${open ? "open" : ""}>
+    <summary class="card-head sec-head">
+      <h3>${esc(sec.title)} ${tag}${rows.length ? `<span class="sec-count">${rows.length}</span>` : ""}</h3>
+      <span class="sec-mark" aria-hidden="true"></span>
+    </summary>
     ${sec.hint ? `<p class="muted small" style="margin:-4px 0 10px">${esc(sec.hint)}</p>` : ""}
+    <div class="sec-add"><button class="btn btn-sm" type="button" data-act="rs-add" data-sec="${sec.key}">+ 추가</button></div>
     ${rows.length ? rows.map((row, i) => `
       <div class="item">
         <div class="rs-fields">${sec.fields.map((f) => rsFieldHTML(sec, i, f, row)).join("")}</div>
@@ -503,7 +508,7 @@ function rsSectionHTML(sec, r) {
         </div>
       </div>`).join("")
       : `<p class="empty">${sec.optional ? "해당 없으면 비워 두세요. 이력서에서 빠집니다." : "[+ 추가] 를 눌러 입력하세요."}</p>`}
-  </section>`;
+  </details>`;
 }
 
 function rsFieldHTML(sec, i, f, row) {

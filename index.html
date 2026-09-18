@@ -8,6 +8,13 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="app.css" />
+<script>
+/* 테마를 CSS 가 그려지기 전에 정합니다 — 나중에 정하면 화면이 한 번 번쩍입니다.
+   기본은 밝게. OS 가 어두워도 따라가지 않습니다. 이 앱은 오래 들여다보며
+   읽고 쓰는 도구라 밝은 쪽이 기본이어야 합니다. 원하면 버튼으로 바꿉니다. */
+try { document.documentElement.dataset.theme = localStorage.getItem("pf-theme") || "light"; }
+catch (e) { document.documentElement.dataset.theme = "light"; }
+</script>
 </head>
 <body>
 
@@ -19,6 +26,7 @@
   <div class="toolbar">
     <span id="ai-status" class="row"></span>
     <span id="save-state" class="pill" role="status" aria-live="polite"></span>
+    <button id="btn-theme" class="btn btn-sm btn-ghost" type="button" title="밝게 / 어둡게">◐</button>
     <details class="menu">
       <summary class="btn btn-sm">데이터 ▾</summary>
       <div class="menu-pop">

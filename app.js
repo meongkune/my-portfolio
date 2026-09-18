@@ -302,6 +302,12 @@ window.addEventListener("beforeunload", (ev) => {
 });
 
 /* ---------- 백업 · 복원 · 초기화 ---------- */
+$("#btn-theme").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("pf-theme", next); } catch (e) { /* 사생활 보호 모드 등 — 이번 세션만 적용됩니다 */ }
+});
+
 $("#btn-export").addEventListener("click", () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: "application/json;charset=utf-8" }));
