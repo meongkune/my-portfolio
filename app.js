@@ -159,17 +159,21 @@ async function syncFromServer() {
 }
 
 /* ---------- 화면 전환 ---------- */
+/* 메뉴는 번호가 아니라 '하는 일'로 나눕니다. 번호는 순서를 강요하는데,
+   실제로는 공고를 보다가 이력서를 고치고 다시 공고로 돌아가기 때문입니다.
+   group 은 사이드바에서 구분선을 넣을 자리를 정합니다. */
 const MENUS = [
-  { id: "resume", label: "① 내 이력서", render: renderResume },
-  { id: "postings", label: "② 채용공고", render: renderPostings },
-  { id: "cover", label: "③ 자소서", render: renderCover },
-  { id: "calendar", label: "④ 일정", render: renderCalendar },
-  { id: "interview", label: "⑤ 면접 준비", render: renderInterview },
+  { id: "home", label: "현황", icon: "◆", group: "", render: renderHome },
+  { id: "resume", label: "이력서", icon: "▤", group: "준비", render: renderResume },
+  { id: "postings", label: "채용공고", icon: "▶", group: "지원", render: renderPostings },
+  { id: "cover", label: "자소서", icon: "✎", group: "", render: renderCover },
+  { id: "calendar", label: "일정", icon: "▦", group: "", render: renderCalendar },
+  { id: "interview", label: "면접 준비", icon: "◇", group: "", render: renderInterview },
 ];
 
 function currentRoute() {
   const [id, sub] = (location.hash || "").replace(/^#\//, "").split("/");
-  return MENUS.some((m) => m.id === id) ? { id, sub: sub ? decodeURIComponent(sub) : "" } : { id: S.postings.length ? "postings" : "resume", sub: "" };
+  return MENUS.some((m) => m.id === id) ? { id, sub: sub ? decodeURIComponent(sub) : "" } : { id: "home", sub: "" };
 }
 
 /* 백그라운드 작업이 끝났을 때 쓰는 다시 그리기.
@@ -199,7 +203,15 @@ document.addEventListener("focusout", () => setTimeout(flushPending, 50));
 setInterval(flushPending, 700);   /* 창이 포커스를 잃은 상태 등 focusout 이 오지 않는 경우 대비 */
 
 function renderChrome(id = currentRoute().id) {
-  $("#tabs").innerHTML = MENUS.map((m) => `<a class="tab" href="#/${m.id}" ${m.id === id ? 'aria-current="page"' : ""}>${esc(m.label)}${m.id === "postings" && S.postings.some((p) => p.status === "analyzing") ? ' <i class="spin"></i>' : ""}</a>`).join("");
+  $("#tabs").innerHTML = MENUS.map((m) => {
+    const busy = m.id === "postings" && S.postings.some((p) => p.status === "analyzing");
+    return `${m.group ? `<span class="side-group">${esc(m.group)}</span>` : ""}
+      <a class="side-item" href="#/${m.id}" ${m.id === id ? 'aria-current="page"' : ""}>
+        <span class="side-icon" aria-hidden="true">${m.icon}</span>
+        <span class="side-label">${esc(m.label)}</span>
+        ${busy ? '<i class="spin"></i>' : `<span class="side-badge">${sideBadge(m.id)}</span>`}
+      </a>`;
+  }).join("");
   renderMeBar();
   clRenderStatus();
 }
