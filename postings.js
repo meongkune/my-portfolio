@@ -650,10 +650,12 @@ function renderPostings(sub) {
     active: list.filter((p) => PO_ACTIVE.includes(p.stage)).length,
     closed: list.filter((p) => PO_DONE.includes(p.stage) || (p.deadline && dday(p.deadline).kind === "off")).length,
   };
-  const shown = list.filter((p) => poFilter === "star" ? p.star : poFilter === "active" ? PO_ACTIVE.includes(p.stage)
+  const shown = list.filter((p) => poFilter === "near" ? cmWithin(p)
+    : poFilter === "star" ? p.star : poFilter === "active" ? PO_ACTIVE.includes(p.stage)
     : poFilter === "closed" ? PO_DONE.includes(p.stage) || (p.deadline && dday(p.deadline).kind === "off")
     : !(PO_DONE.includes(p.stage)))
     .slice().sort((a, b) => {
+      if (poSort === "near") return cmSortKey(a) - cmSortKey(b);
       if (poSort === "deadline") return (a.deadline || "9999").localeCompare(b.deadline || "9999");
       if (poSort === "recent") return b.createdAt.localeCompare(a.createdAt);
       return (b.fit?.computed.total ?? -1) - (a.fit?.computed.total ?? -1);
@@ -675,15 +677,18 @@ function renderPostings(sub) {
     ${poAddFormHTML()}
   </section>
 
+  ${cmStripHTML()}
+
   <div class="list-bar">
     <div class="chips">
-      ${[["all", "진행 중인 공고", counts.all - list.filter((p) => PO_DONE.includes(p.stage)).length], ["star", "★ 관심", counts.star], ["active", "지원 진행", counts.active], ["closed", "마감·종료", counts.closed]].map(([k, l, n]) =>
+      ${[["all", "진행 중인 공고", counts.all - list.filter((p) => PO_DONE.includes(p.stage)).length], ["star", "★ 관심", counts.star], ["active", "지원 진행", counts.active], ["closed", "마감·종료", counts.closed],
+        ...(cmReady() ? [["near", `🚇 통근 범위 안`, list.filter(cmWithin).length]] : [])].map(([k, l, n]) =>
         `<button class="chip ${poFilter === k ? "accent" : ""}" data-act="po-filter" data-f="${k}" type="button">${l} ${n}</button>`).join("")}
     </div>
     <div class="row">
       <details class="rubric-pop"><summary class="btn btn-sm btn-ghost">점수 기준 보기</summary>${poRubricHTML()}</details>
       <select data-po-sort="1" aria-label="정렬">
-        ${[["score", "적합도 높은 순"], ["deadline", "마감 임박 순"], ["recent", "최근 추가 순"]].map(([k, l]) => `<option value="${k}"${poSort === k ? " selected" : ""}>${l}</option>`).join("")}
+        ${[["score", "적합도 높은 순"], ...(cmReady() ? [["near", "🚇 집에서 가까운 순"]] : []), ["deadline", "마감 임박 순"], ["recent", "최근 추가 순"]].map(([k, l]) => `<option value="${k}"${poSort === k ? " selected" : ""}>${l}</option>`).join("")}
       </select>
     </div>
   </div>

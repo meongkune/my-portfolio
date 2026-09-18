@@ -297,6 +297,10 @@ tfoot th, tfoot td { border-bottom: 0; font-weight: 700; }
 .cm-b2 { color: var(--near-2); background: var(--near-2-soft); }
 .cm-b3 { color: var(--near-3); background: var(--near-3-soft); }
 /* 공고 상세의 통근 한 줄 — 배지와 [경로 보기]를 한데 묶어 눈에 걸리게 합니다 */
+/* 공고 화면 맨 위의 통근 기준 줄 — 카드이되 주인공이 아니므로 조용하게 */
+.cm-strip { background: var(--gray-1); box-shadow: none; border: 1px solid var(--border); padding: 14px 18px; }
+.cm-strip > summary { list-style: none; }
+.cm-strip > summary::-webkit-details-marker { display: none; }
 .cm-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px 12px; background: var(--gray-1); border-radius: var(--r-ctl); }
 .cm-legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
 .cm-band { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; background: var(--gray-1); border-radius: var(--r-ctl); padding: 12px 14px; }

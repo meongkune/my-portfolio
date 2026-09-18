@@ -63,6 +63,66 @@ function cmRouteUrl(destName, destLat, destLng) {
   return `https://m.map.kakao.com/scheme/route?${parts.join("&")}`;
 }
 
+/* 통근 기준이 잡혀 있는가 — 잡히기 전에는 통근 관련 UI 를 아예 내보이지
+   않습니다. 쓸 수 없는 버튼을 보여 주는 것이 없는 것보다 나쁩니다. */
+function cmReady() {
+  const h = cmHome();
+  return !!(h.station && h.bands);
+}
+
+/* 공고가 통근 범위(마지막 구간) 안에 있는가 */
+function cmWithin(p) {
+  const i = cmBandOf(p.station || p.location);
+  return i !== null && i < 3;
+}
+
+/* 정렬용 — 작을수록 가깝습니다. 모르는 곳은 맨 뒤로 보냅니다. */
+function cmSortKey(p) {
+  const i = cmBandOf(p.station || p.location);
+  return i === null ? 9 : i;
+}
+
+/* 공고 화면 맨 위에 붙는 통근 기준 줄.
+   통근을 별도 메뉴로 떼어 두니 공고와 따로 노는 느낌이 났습니다.
+   집 기준은 공고를 볼 때 쓰는 것이므로 공고 화면에서 바로 고칩니다. */
+function cmStripHTML() {
+  const h = cmHome();
+  if (!cmReady()) {
+    return `
+      <section class="card cm-strip">
+        <div class="row wrap">
+          <span class="cm-badge cm-b3">🚇</span>
+          <strong>통근 기준을 정하면 공고마다 집에서 얼마나 걸리는지 표시됩니다</strong>
+          <input type="text" data-bind="commute.address" value="${esc(h.address)}" placeholder="집 주소 — 예: 서울 성북구 동소문로" style="flex:1;min-width:200px" />
+          <button class="btn btn-primary btn-sm" type="button" data-act="cm-detect" ${cmBusy ? "disabled" : ""}>
+            ${cmBusy ? "확인 중…" : "통근 범위 계산"}
+          </button>
+        </div>
+        <p class="muted small" style="margin-top:8px">🔒 브라우저에만 저장됩니다. 한 번만 하면 되고 이사할 때만 다시 합니다.</p>
+      </section>`;
+  }
+  const counts = h.bands.map((b) => b.length);
+  return `
+    <details class="card cm-strip">
+      <summary class="row wrap" style="cursor:pointer">
+        <span class="cm-badge cm-b0">🚇 ${esc(h.station)}</span>
+        <span class="muted small">기준 · ${CM_BANDS[0]}분 ${counts[0]}곳 · ${CM_BANDS[1]}분 ${counts[1]}곳 · ${CM_BANDS[2]}분 ${counts[2]}곳</span>
+        <span class="muted small" style="margin-left:auto">고치기 ▾</span>
+      </summary>
+      <div class="row wrap" style="margin-top:12px">
+        <input type="text" data-bind="commute.address" value="${esc(h.address)}" placeholder="집 주소" style="flex:1;min-width:200px" />
+        <button class="btn btn-sm" type="button" data-act="cm-detect" ${cmBusy ? "disabled" : ""}>
+          ${cmBusy ? "확인 중…" : "다시 계산"}
+        </button>
+      </div>
+      ${h.bands.map((list, i) => list.length ? `
+        <details class="cm-list">
+          <summary><span class="cm-dot cm-b${i}"></span>${esc(cmBandLabel(i))} — ${list.length}곳</summary>
+          <p class="muted small">${list.map((s) => esc(s)).join(" · ")}</p>
+        </details>` : "").join("")}
+    </details>`;
+}
+
 /* 공고 검색 프롬프트에 끼워 넣을 통근 조건.
    통근 기능과 공고 검색이 따로 놀지 않게 하는 연결 고리입니다 —
    검색 단계에서 이미 걸러 오면, 화면에서 거르는 것보다 결과가 훨씬 낫습니다.
@@ -143,84 +203,11 @@ async function cmDetect() {
 
 let cmBusy = false;
 
-/* ---------- 화면 ---------- */
-function renderCommute() {
-  const h = cmHome();
-  const total = h.bands ? h.bands.reduce((n, b) => n + b.length, 0) : 0;
-
-  return `
-    <div class="view-head">
-      <h2>통근</h2>
-      <p class="muted">집에서 얼마나 걸리는지를 공고 판단의 1급 기준으로 씁니다.</p>
-    </div>
-
-    <section class="card">
-      <div class="card-head"><h3>집 위치</h3>
-        ${h.checkedAt ? `<span class="chip">${esc(h.checkedAt)} 확인</span>` : ""}</div>
-      <label class="field">
-        <span>집 주소 — 동까지만 적어도 됩니다</span>
-        <input type="text" data-bind="commute.address" value="${esc(h.address)}"
-          placeholder="예: 서울 성북구 동소문로" />
-      </label>
-      <p class="muted small" style="margin:-6px 0 12px">
-        🔒 이 주소는 브라우저에만 저장됩니다. 내보내는 파일과 공개 저장소에는 들어가지 않습니다.
-        이사하면 여기만 고치면 됩니다.
-      </p>
-      <div class="row wrap">
-        <button class="btn btn-primary" type="button" data-act="cm-detect" ${cmBusy ? "disabled" : ""}>
-          ${cmBusy ? "확인 중…" : h.bands ? "통근 범위 다시 계산" : "통근 범위 계산"}
-        </button>
-        ${h.station ? `<span class="chip accent">가장 가까운 역 · ${esc(h.station)}</span>` : ""}
-        ${h.lat ? `<span class="chip">좌표 확인됨</span>` : ""}
-      </div>
-    </section>
-
-    ${h.bands ? `
-    <section class="card">
-      <div class="card-head"><h3>통근 범위</h3>
-        <span class="muted small">환승 1회 이하 · 역 ${total}곳</span></div>
-      <div class="cm-legend">
-        ${CM_BANDS.map((m, i) => `
-          <div class="cm-band">
-            <span class="cm-badge cm-b${i}">🚇 ${esc(cmBandLabel(i))}</span>
-            <strong class="cm-band-n">${h.bands[i].length}</strong>
-            <span class="muted small">곳</span>
-          </div>`).join("")}
-      </div>
-      ${h.bands.map((list, i) => list.length ? `
-        <details class="cm-list">
-          <summary><span class="cm-dot cm-b${i}"></span>${esc(cmBandLabel(i))} — ${list.length}곳</summary>
-          <p class="muted small">${list.map((s) => esc(s)).join(" · ")}</p>
-        </details>` : "").join("")}
-      <p class="muted small" style="margin-top:12px">
-        채용공고의 근무지가 이 역들 안에 있으면 공고 목록에 배지가 붙습니다.
-      </p>
-    </section>` : `
-    <section class="card">
-      <p class="empty">아직 통근 범위를 계산하지 않았습니다. 주소를 넣고 [통근 범위 계산]을 누르세요.</p>
-    </section>`}
-
-    <section class="card">
-      <div class="card-head"><h3>경로 열어 보기</h3></div>
-      <p class="muted small" style="margin-bottom:10px">
-        회사 이름이나 주소를 넣으면 집에서 거기까지 가는 버스·지하철 경로가 카카오맵에서 바로 열립니다.
-        출발지를 다시 칠 필요가 없습니다.
-      </p>
-      <div class="row wrap">
-        <input type="text" id="cm-dest" placeholder="예: 카카오 판교 아지트 / 서울 강남구 테헤란로 152" />
-        <button class="btn" type="button" data-act="cm-open">경로 보기 ↗</button>
-      </div>
-    </section>`;
-}
+/* 화면은 공고 쪽(cmStripHTML)에 있습니다. 통근만 따로 보는 화면은 두지 않습니다 —
+   집 기준은 공고를 볼 때 쓰는 값이지 그 자체로 들여다볼 것이 아닙니다. */
 
 function commuteAction(act, btn) {
   if (act === "cm-detect") { cmDetect(); return true; }
-  if (act === "cm-open") {
-    const dest = ($("#cm-dest") || {}).value || "";
-    if (!dest.trim()) { toast("도착지를 입력하세요.", "warn"); return true; }
-    window.open(cmRouteUrl(dest.trim()), "_blank", "noopener");
-    return true;
-  }
   return false;
 }
 

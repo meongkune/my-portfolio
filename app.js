@@ -167,7 +167,6 @@ const MENUS = [
   { id: "resume", label: "이력서", icon: "▤", group: "준비", render: renderResume },
   { id: "dev", label: "개발자", icon: "❯", group: "", render: renderDev },
   { id: "postings", label: "채용공고", icon: "▶", group: "지원", render: renderPostings },
-  { id: "commute", label: "통근", icon: "⇄", group: "", render: renderCommute },
   { id: "cover", label: "자소서", icon: "✎", group: "", render: renderCover },
   { id: "calendar", label: "일정", icon: "▦", group: "", render: renderCalendar },
   { id: "interview", label: "면접 준비", icon: "◇", group: "", render: renderInterview },
@@ -175,6 +174,7 @@ const MENUS = [
 
 function currentRoute() {
   const [id, sub] = (location.hash || "").replace(/^#\//, "").split("/");
+  if (id === "commute") return { id: "postings", sub: "" };   /* 통근은 공고 화면 안으로 옮겼습니다 */
   return MENUS.some((m) => m.id === id) ? { id, sub: sub ? decodeURIComponent(sub) : "" } : { id: "home", sub: "" };
 }
 
