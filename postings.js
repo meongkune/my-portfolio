@@ -48,7 +48,7 @@ function poNormalize(list) {
       url: poCleanUrl(p.url), recIdx: rsStr(p.recIdx),
       company: rsStr(p.company), title: rsStr(p.title),
       deadline: /^\d{4}-\d{2}-\d{2}$/.test(p.deadline || "") ? p.deadline : "", deadlineText: rsStr(p.deadlineText),
-      location: rsStr(p.location), station: rsStr(p.station), career: rsStr(p.career), education: rsStr(p.education),
+      location: rsStr(p.location), addr: rsStr(p.addr), station: rsStr(p.station), career: rsStr(p.career), education: rsStr(p.education),
       employmentType: rsStr(p.employmentType), salary: rsStr(p.salary),
       summary: rsStr(p.summary), duties: rsArr(p.duties), keywords: rsArr(p.keywords),
       process: rsArr(p.process), benefits: rsArr(p.benefits), requirements: reqs,
@@ -486,8 +486,12 @@ async function poRunSearch() {
 ${cmSearchHint()}
 1) 지역이 있으면 search_location_codes 로 코드를 찾고 2) search_saramin_jobs 를 검색어 중심으로 호출합니다 (경력 조건은 검색어에 "신입"/"경력"으로 붙임).
 3) 조건에 맞는 공고 최대 12건. 도구가 준 글자를 그대로 옮기고 없는 값은 "".
-4) 공고마다 근무지에서 가장 가까운 지하철역 이름을 station 에 적어 주세요. 공고 근무지 글자에 역 이름이 있으면 그대로 쓰고, 없으면 카카오맵 SearchPlaceByKeywordOpen 으로 근무지를 찾아 가장 가까운 역을 적습니다. 모르면 "".
-[출력] JSON 만: ${JSON.stringify({ schema: "pf-search-v1", mcpUsed: true, jobs: [{ recIdx: "", title: "", company: "", location: "", station: "", career: "", deadlineText: "", url: "" }] })}`,
+4) 공고마다 근무지 위치를 채웁니다. 사람인이 주는 근무지는 "서울 성동구"처럼 구 단위라 역을 알 수 없습니다. 그러니 이 순서로 하세요.
+   ① 카카오맵 SearchPlaceByKeywordOpen 을 "<구 이름> <회사명>"으로 검색해 회사의 실제 주소를 찾습니다 (예: "성동구 엠엑스엔코리아").
+   ② 찾은 도로명 주소를 addr 에, 그 주소에서 가장 가까운 지하철역을 station 에 적습니다.
+   ③ 회사가 검색되지 않거나, 공채처럼 근무지가 여러 곳이면 addr 과 station 을 "" 로 둡니다.
+   ⚠ 역을 추측해서 채우지 마세요. 틀린 역이 들어가면 통근 표시가 거짓말을 하게 됩니다. 모르면 반드시 "".
+[출력] JSON 만: ${JSON.stringify({ schema: "pf-search-v1", mcpUsed: true, jobs: [{ recIdx: "", title: "", company: "", location: "", addr: "", station: "", career: "", deadlineText: "", url: "" }] })}`,
     });
     if (!data) return;
     if (!data.mcpUsed) { toast("사람인 검색을 쓰지 못했습니다. 위쪽 [연결 설정]에서 사람인을 연결해 주세요.", "warn"); return; }
@@ -528,7 +532,7 @@ function postingsAction(act, btn) {
     case "po-search": poRunSearch(); break;
     case "po-search-add": {
       const j = poSearch.results[Number(btn.dataset.i)];
-      if (j) poAddLink(j.url, "", { source: "search", title: j.title, company: j.company, location: j.location, station: j.station });
+      if (j) poAddLink(j.url, "", { source: "search", title: j.title, company: j.company, location: j.location, addr: j.addr, station: j.station });
       break;
     }
     case "po-filter": poFilter = btn.dataset.f; render(); break;

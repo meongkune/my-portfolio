@@ -217,7 +217,9 @@ function commuteAction(act, btn) {
 function cmCommuteRowHTML(p) {
   const h = cmHome();
   if (!h.address && !h.station) return "";
-  const where = p.station || p.location || p.company;
+  /* 구 단위(p.location)로 길찾기를 열면 구청으로 안내됩니다.
+     찾아 둔 실제 주소 → 역 → 회사 이름 순으로 정확한 것을 먼저 씁니다. */
+  const where = p.addr || p.station || p.company || p.location;
   if (!where) return "";
   const band = cmBandOf(p.station || p.location);
   return `
