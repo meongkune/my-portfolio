@@ -270,6 +270,23 @@ tfoot th, tfoot td { border-bottom: 0; font-weight: 700; }
 .stat-label { font-size: 12px; color: var(--gray-4); font-weight: 600; }
 @media (max-width: 640px) { .stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .stat { padding: 12px 12px; } .stat-num { font-size: 22px; } }
 
+/* ---------- 개발자 (GitHub) ----------
+   저장소가 수십 개일 수 있어 목록은 촘촘하게, 초안은 넉넉하게 둡니다.
+   고르는 화면과 고쳐 쓰는 화면은 밀도가 달라야 합니다. */
+.gh-list { display: flex; flex-direction: column; max-height: 420px; overflow-y: auto; }
+.gh-item { display: flex; align-items: center; gap: 10px; padding: 9px 4px; border-top: 1px solid var(--gray-2); cursor: pointer; font-size: 14px; }
+.gh-item:first-child { border-top: 0; }
+.gh-item:hover { background: var(--gray-1); }
+.gh-item input { width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+.gh-main { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.gh-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.gh-when { flex: none; font-variant-numeric: tabular-nums; }
+.gh-fork { opacity: .6; }
+.gh-draft { border-top: 1px solid var(--gray-2); padding-top: 16px; margin-top: 16px; }
+.gh-draft:first-of-type { border-top: 0; margin-top: 0; }
+.gh-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+@media (max-width: 640px) { .gh-fields { grid-template-columns: minmax(0, 1fr); } .gh-when { display: none; } }
+
 /* ---------- 통근 ----------
    구간 색은 신호등처럼 읽히게 했습니다. 가까울수록 초록, 멀수록 회색.
    이 앱에서 '집에서 가까움'은 상태(성공/경고)가 아니라 독립된 척도라

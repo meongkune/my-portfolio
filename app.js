@@ -165,6 +165,7 @@ async function syncFromServer() {
 const MENUS = [
   { id: "home", label: "현황", icon: "◆", group: "", render: renderHome },
   { id: "resume", label: "이력서", icon: "▤", group: "준비", render: renderResume },
+  { id: "dev", label: "개발자", icon: "❯", group: "", render: renderDev },
   { id: "postings", label: "채용공고", icon: "▶", group: "지원", render: renderPostings },
   { id: "commute", label: "통근", icon: "⇄", group: "", render: renderCommute },
   { id: "cover", label: "자소서", icon: "✎", group: "", render: renderCover },
@@ -258,8 +259,12 @@ function onInput(ev) {
   if (t.dataset.type === "answer") ivRefreshKeywords(t);
   refreshResumePreview();   /* 미리보기·완성도만 다시 그립니다 (입력 칸은 건드리지 않음) */
 }
-$("#view").addEventListener("input", (ev) => { if (ev.target.tagName !== "SELECT") onInput(ev); });
+$("#view").addEventListener("input", (ev) => {
+  if (githubInput(ev.target)) return;          /* 초안 검수 칸은 화면을 다시 그리지 않습니다 */
+  if (ev.target.tagName !== "SELECT") onInput(ev);
+});
 $("#view").addEventListener("change", (ev) => {
+  if (githubInput(ev.target)) return;
   if (ev.target.tagName === "SELECT" || ev.target.type === "date" || ev.target.type === "time") onInput(ev);
 });
 
@@ -269,7 +274,7 @@ document.addEventListener("click", (ev) => {
   const act = btn.dataset.act;
   if (act === "me-edit") return meDialog();
   if (act === "setup") return clSetupDialog();
-  if (resumeAction(act, btn) || postingsAction(act, btn) || coverAction(act, btn) || calendarAction(act, btn) || interviewAction(act, btn) || commuteAction(act, btn)) ev.preventDefault();
+  if (resumeAction(act, btn) || postingsAction(act, btn) || coverAction(act, btn) || calendarAction(act, btn) || interviewAction(act, btn) || commuteAction(act, btn) || githubAction(act, btn)) ev.preventDefault();
 });
 
 document.addEventListener("keydown", (ev) => {

@@ -8,6 +8,7 @@ const SEED_DATA = {
     custom: [], layout: { order: [], hidden: [] },
     prefs: { level: "신입", years: "", regions: "", employment: "", salary: "", industries: "", avoid: "" }
   },
+  github: { user: "", importedAt: "" },
   commute: { address: "", station: "", lat: null, lng: null, bands: null, checkedAt: "" },
   postings: [],
   writingRules: null,
