@@ -1,40 +1,52 @@
 /* ============================================================
-   내 취업 포트폴리오 — 토스(Toss) 디자인 언어
+   내 취업 포트폴리오 — 브러시드 메탈(Brushed Metal) 디자인 언어
    ------------------------------------------------------------
    원칙
-   - 강조색은 파랑 하나. 나머지는 5단계 회색으로만 (상태색은 뜻이 있을 때만).
+   - 강조색은 스틸 하나. 나머지는 푸른기가 도는 회색 5단계로만.
+     (회색에 푸른기를 넣는 것이 '금속' 느낌의 8할입니다. 따뜻한 회색은 종이가 됩니다.)
+   - 광택은 전면에 깔지 않습니다. 숫자·배지·주요 버튼 세 곳만.
+     전체에 깔면 2000년대 웹이 됩니다. 아껴 쓸수록 각인됩니다.
    - 테두리 대신 여백과 그림자로 나눕니다. 그림자는 4단계, 투명도 4~12%.
-   - 숫자가 주인공: 점수·D-day 는 크게, 나머지는 작고 조용하게.
+   - 숫자가 주인공: 점수·D-day·통근시간은 크게, 나머지는 작고 조용하게.
    - 둥근 모서리: 카드 20, 입력·버튼 12, 칩 999.
    ============================================================ */
 :root {
-  /* 강조색 (단 하나) */
-  --accent: #3182f6;
-  --accent-press: #1b64da;
-  --accent-soft: #e8f3ff;
-  /* 회색 5단계 */
+  /* 강조색 (단 하나) — 스틸 블루 */
+  --accent: #4a6b8a;
+  --accent-press: #35506b;
+  --accent-soft: #e9eef4;
+  /* 회색 5단계 — 전부 푸른기를 섞은 실버 */
   --gray-0: #ffffff;
-  --gray-1: #f9fafb;
-  --gray-2: #f2f4f6;
-  --gray-3: #e5e8eb;
-  --gray-4: #8b95a1;
-  --gray-5: #4e5968;
-  --text: #191f28;
+  --gray-1: #fafbfc;
+  --gray-2: #eef1f5;
+  --gray-3: #dfe4ea;
+  --gray-4: #8793a3;
+  --gray-5: #49566a;
+  --text: #1b2330;
+  /* 금속 광택 — 포인트에만 씁니다 */
+  --metal: linear-gradient(145deg, #f7f9fb 0%, #dfe4ea 45%, #eef1f5 55%, #cdd5de 100%);
+  --metal-accent: linear-gradient(145deg, #5c7f9f 0%, #3d5c79 48%, #4a6b8a 52%, #2f4a63 100%);
+  --metal-edge: rgba(255, 255, 255, .75);
   --muted: var(--gray-4);
   --bg: var(--gray-2);
   --surface: var(--gray-0);
   --surface-2: var(--gray-2);
   --border: var(--gray-3);
-  /* 뜻이 있는 색만 */
-  --ok: #0f8a5f; --ok-soft: #e7f7f0;
-  --warn: #c86f00; --warn-soft: #fff4e6;
-  --danger: #f04452; --danger-soft: #ffeff0;
+  /* 뜻이 있는 색만 — 메탈 바탕에서 뜨지 않도록 채도를 낮췄습니다 */
+  --ok: #1a7f5a; --ok-soft: #e4f4ed;
+  --warn: #a96500; --warn-soft: #fbf1e2;
+  --danger: #cf3f4d; --danger-soft: #fbebec;
+  /* 통근 시간 구간 — 집에서 가까운 순 (이 앱의 1급 지표) */
+  --near-0: #1a7f5a; --near-0-soft: #e4f4ed;
+  --near-1: #8a7a1f; --near-1-soft: #f6f3e0;
+  --near-2: #a96500; --near-2-soft: #fbf1e2;
+  --near-3: #8793a3; --near-3-soft: #eef1f5;
   /* 모양 */
   --r-card: 20px; --r-ctl: 12px; --r-sm: 8px;
-  --sh-card: 0 1px 3px rgba(0, 0, 0, .04);
-  --sh-btn: 0 1px 3px rgba(0, 0, 0, .06);
-  --sh-up: 0 4px 12px rgba(0, 0, 0, .08);
-  --sh-modal: 0 8px 24px rgba(0, 0, 0, .12);
+  --sh-card: 0 1px 2px rgba(27, 35, 48, .05), 0 1px 3px rgba(27, 35, 48, .04);
+  --sh-btn: 0 1px 3px rgba(27, 35, 48, .07);
+  --sh-up: 0 4px 12px rgba(27, 35, 48, .09);
+  --sh-modal: 0 8px 24px rgba(27, 35, 48, .14);
   --t-fast: 100ms; --t: 200ms;
   /* 일정 종류 색 */
   --ev0: #f04452; --ev1: #3182f6; --ev2: #8b5cf6; --ev3: #0891b2; --ev4: #ea580c; --ev5: #0f8a5f; --ev6: #8b95a1;
@@ -42,10 +54,18 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --accent: #4593fc; --accent-press: #74aeff; --accent-soft: #1b2b45;
-    --gray-0: #1e1e1e; --gray-1: #252525; --gray-2: #252525; --gray-3: #33383d; --gray-4: #9aa0a6; --gray-5: #c4c9ce;
-    --text: #e0e0e0; --bg: #121212; --surface: #1e1e1e; --surface-2: #252525; --border: #33383d;
-    --ok: #8fbf9a; --ok-soft: #1c2f24; --warn: #ffb347; --warn-soft: #33281a; --danger: #ff5c5c; --danger-soft: #3a1f1d;
+    /* 다크에서도 회색에 푸른기를 유지합니다 — 중성 회색이 되면 금속 느낌이 사라집니다 */
+    --accent: #7ba3c7; --accent-press: #9dbcd8; --accent-soft: #1e2b38;
+    --gray-0: #1c2129; --gray-1: #232932; --gray-2: #232932; --gray-3: #353d49; --gray-4: #94a0b0; --gray-5: #c3cbd6;
+    --text: #e2e6ec; --bg: #14181e; --surface: #1c2129; --surface-2: #232932; --border: #353d49;
+    --metal: linear-gradient(145deg, #2d3540 0%, #1c2129 45%, #262e39 55%, #171c23 100%);
+    --metal-accent: linear-gradient(145deg, #8fb4d4 0%, #6b93b8 48%, #7ba3c7 52%, #4a6b8a 100%);
+    --metal-edge: rgba(255, 255, 255, .10);
+    --ok: #6fbf95; --ok-soft: #162b22; --warn: #e0a24e; --warn-soft: #2e2519; --danger: #e8707c; --danger-soft: #331d20;
+    --near-0: #6fbf95; --near-0-soft: #162b22;
+    --near-1: #cbbd6a; --near-1-soft: #2a2718;
+    --near-2: #e0a24e; --near-2-soft: #2e2519;
+    --near-3: #94a0b0; --near-3-soft: #232932;
     --sh-card: none; --sh-btn: none; --sh-up: 0 4px 12px rgba(0, 0, 0, .4); --sh-modal: 0 8px 24px rgba(0, 0, 0, .5);
     --ev0: #ff5c5c; --ev1: #4593fc; --ev2: #b69cf0; --ev3: #5cc6d8; --ev4: #f0a36b; --ev5: #8fbf9a; --ev6: #9aa0a6;
     color-scheme: dark;
@@ -101,7 +121,11 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 }
 .btn:hover { background: var(--gray-3); text-decoration: none; }
 .btn:active { transform: scale(.98); }
-.btn-primary { background: var(--accent); color: #fff; box-shadow: var(--sh-btn); }
+/* 광택 ①/③ — 주 버튼. 위쪽 밝은 테두리 한 줄이 '금속판' 느낌을 만듭니다 */
+.btn-primary {
+  background: var(--metal-accent); color: #fff; box-shadow: var(--sh-btn);
+  border-top: 1px solid rgba(255, 255, 255, .22);
+}
 .btn-primary:hover { background: var(--accent-press); }
 .btn-ghost { background: transparent; color: var(--gray-5); }
 .btn-ghost:hover { background: var(--surface-2); }
@@ -164,7 +188,10 @@ tfoot th, tfoot td { border-bottom: 0; font-weight: 700; }
 /* ---------- 틀 ---------- */
 .topbar {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px;
-  padding: 14px 24px; background: var(--surface);
+  /* 광택 ②/③ — 상단바. 앱을 열자마자 보이는 유일한 금속면입니다 */
+  padding: 14px 24px; background: var(--metal);
+  border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 var(--metal-edge);
 }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand h1 { font-size: 17px; }
@@ -367,7 +394,12 @@ body.dragging .drop { border-color: var(--accent); background: var(--accent-soft
 .score.err { background: var(--danger-soft); color: var(--danger); }
 .score.busy { color: var(--accent); background: var(--accent-soft); gap: 5px; justify-items: center; }
 .score.big { width: 84px; height: 84px; border-radius: 24px; }
-.score.big strong { font-size: 34px; }
+/* 광택 ③/③ — 큰 점수. 숫자가 주인공이라 여기만 금속으로 깎아냅니다 */
+.score.big strong {
+  font-size: 34px;
+  background: var(--metal-accent); -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}
 
 .detail-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 .detail-top select { width: auto; font-size: 14px; }
