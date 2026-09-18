@@ -42,7 +42,10 @@ async function ghFetch(path) {
 async function ghLoadRepos() {
   const user = (ghConf().user || "").trim();
   if (!user) { toast("GitHub 사용자명을 먼저 넣으세요.", "warn"); return; }
-  ghState.busy = "repos"; ghState.error = ""; render();
+  /* 이전 계정의 결과를 먼저 지웁니다. 남겨 두면 조회에 실패했을 때
+     엉뚱한 계정의 저장소를 방금 친 계정 것으로 오해하게 됩니다. */
+  ghState.busy = "repos"; ghState.error = ""; ghState.repos = null;
+  ghState.picked = new Set(); ghState.drafts = null; render();
   try {
     const list = await ghFetch("/users/" + encodeURIComponent(user) + "/repos?per_page=100&sort=pushed");
     ghState.repos = list.map((r) => ({
