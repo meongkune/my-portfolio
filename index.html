@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>내 취업 포트폴리오</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">🎯</span>
+    <h1>내 취업 포트폴리오</h1>
+  </div>
+  <div class="toolbar">
+    <span id="ai-status" class="row"></span>
+    <span id="save-state" class="pill" role="status" aria-live="polite"></span>
+    <details class="menu">
+      <summary class="btn btn-sm">데이터 ▾</summary>
+      <div class="menu-pop">
+        <button id="btn-export" class="btn btn-sm btn-ghost" type="button">백업 받기 (.json)</button>
+        <label class="btn btn-sm btn-ghost" for="file-import">백업 불러오기</label>
+        <input id="file-import" type="file" accept=".json,application/json" hidden />
+        <button id="btn-clear" class="btn btn-sm btn-ghost btn-danger" type="button">전부 지우고 새로 시작</button>
+      </div>
+    </details>
+  </div>
+</header>
+
+<div id="me-bar" class="me-bar-wrap"></div>
+<nav class="tabs" id="tabs" aria-label="주요 메뉴"></nav>
+<main id="view" class="view"></main>
+
+<footer class="footer muted small">
+  내 컴퓨터에만 저장되는 개인용 도구입니다 · AI 는 내 Claude 구독으로 동작해 따로 요금이 붙지 않습니다 · 공고·회사 정보는 사람인, 뉴스는 네이버 검색을 씁니다
+</footer>
+
+<script src="data.js"></script>
+<script src="claude.js"></script>
+<script src="me.js"></script>
+<script src="resume.js"></script>
+<script src="ingest.js"></script>
+<script src="postings.js"></script>
+<script src="cover.js"></script>
+<script src="calendar.js"></script>
+<script src="interview.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
