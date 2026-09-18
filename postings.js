@@ -48,7 +48,7 @@ function poNormalize(list) {
       url: poCleanUrl(p.url), recIdx: rsStr(p.recIdx),
       company: rsStr(p.company), title: rsStr(p.title),
       deadline: /^\d{4}-\d{2}-\d{2}$/.test(p.deadline || "") ? p.deadline : "", deadlineText: rsStr(p.deadlineText),
-      location: rsStr(p.location), career: rsStr(p.career), education: rsStr(p.education),
+      location: rsStr(p.location), station: rsStr(p.station), career: rsStr(p.career), education: rsStr(p.education),
       employmentType: rsStr(p.employmentType), salary: rsStr(p.salary),
       summary: rsStr(p.summary), duties: rsArr(p.duties), keywords: rsArr(p.keywords),
       process: rsArr(p.process), benefits: rsArr(p.benefits), requirements: reqs,
@@ -483,9 +483,11 @@ async function poRunSearch() {
 - 직무 키워드: ${q.keyword}
 - 지역: ${q.region || "무관"}
 - 경력: ${q.level}
+${cmSearchHint()}
 1) 지역이 있으면 search_location_codes 로 코드를 찾고 2) search_saramin_jobs 를 검색어 중심으로 호출합니다 (경력 조건은 검색어에 "신입"/"경력"으로 붙임).
 3) 조건에 맞는 공고 최대 12건. 도구가 준 글자를 그대로 옮기고 없는 값은 "".
-[출력] JSON 만: ${JSON.stringify({ schema: "pf-search-v1", mcpUsed: true, jobs: [{ recIdx: "", title: "", company: "", location: "", career: "", deadlineText: "", url: "" }] })}`,
+4) 공고마다 근무지에서 가장 가까운 지하철역 이름을 station 에 적어 주세요. 공고 근무지 글자에 역 이름이 있으면 그대로 쓰고, 없으면 카카오맵 SearchPlaceByKeywordOpen 으로 근무지를 찾아 가장 가까운 역을 적습니다. 모르면 "".
+[출력] JSON 만: ${JSON.stringify({ schema: "pf-search-v1", mcpUsed: true, jobs: [{ recIdx: "", title: "", company: "", location: "", station: "", career: "", deadlineText: "", url: "" }] })}`,
     });
     if (!data) return;
     if (!data.mcpUsed) { toast("사람인 검색을 쓰지 못했습니다. 위쪽 [연결 설정]에서 사람인을 연결해 주세요.", "warn"); return; }
@@ -526,7 +528,7 @@ function postingsAction(act, btn) {
     case "po-search": poRunSearch(); break;
     case "po-search-add": {
       const j = poSearch.results[Number(btn.dataset.i)];
-      if (j) poAddLink(j.url, "", { source: "search", title: j.title, company: j.company });
+      if (j) poAddLink(j.url, "", { source: "search", title: j.title, company: j.company, location: j.location, station: j.station });
       break;
     }
     case "po-filter": poFilter = btn.dataset.f; render(); break;
@@ -738,7 +740,7 @@ function poAddFormHTML() {
     ${poSearch.results.length ? `<div class="search-list">${poSearch.results.map((j, i) => {
       const added = S.postings.some((p) => (j.recIdx && p.recIdx === j.recIdx) || (j.url && p.url === j.url));
       return `<div class="search-item">
-        <div><strong>${esc(j.title)}</strong><div class="muted small">${[j.company, j.location, j.career, j.deadlineText].filter(Boolean).map(esc).join(" · ")}</div></div>
+        <div><strong>${esc(j.title)}</strong> ${cmBadgeHTML(j.station || j.location)}<div class="muted small">${[j.company, j.location, j.career, j.deadlineText].filter(Boolean).map(esc).join(" · ")}</div></div>
         <div class="row">${j.url ? `<a class="btn btn-sm btn-ghost" href="${esc(j.url)}" target="_blank" rel="noopener noreferrer">보기 ↗</a>` : ""}
           ${added ? `<span class="chip ok">추가됨</span>` : `<button class="btn btn-sm" data-act="po-search-add" data-i="${i}" type="button" ${j.url ? "" : "disabled"}>추가</button>`}</div>
       </div>`; }).join("")}</div><p class="muted small">조회 ${esc(poSearch.at)} · 출처: 사람인</p>` : ""}`;
@@ -774,7 +776,7 @@ function poCardHTML(p) {
       <div class="po-title">
         <div class="po-line"><strong>${esc(p.title || (p.status === "analyzing" ? "공고를 읽는 중…" : p.url || "제목 없음"))}</strong>
           ${d ? `<span class="chip ${d.kind}">${esc(d.text)}</span>` : p.deadlineText ? `<span class="chip">${esc(p.deadlineText)}</span>` : ""}</div>
-        <div class="muted small">${[p.company, p.location, p.career, p.employmentType].filter(Boolean).map(esc).join(" · ") || esc({ link: "링크", image: "스크린샷", manual: "직접 입력", search: "사람인 검색" }[p.source])}${p.apply?.submitted ? ` · <span class="ok-text">📮 제출 ${esc(p.apply.submittedAt)}</span>` : ""}</div>
+        <div class="muted small">${cmBadgeHTML(p.station || p.location)} ${[p.company, p.location, p.career, p.employmentType].filter(Boolean).map(esc).join(" · ") || esc({ link: "링크", image: "스크린샷", manual: "직접 입력", search: "사람인 검색" }[p.source])}${p.apply?.submitted ? ` · <span class="ok-text">📮 제출 ${esc(p.apply.submittedAt)}</span>` : ""}</div>
         ${p.status === "error" ? `<p class="small err-text">${esc(p.error)}</p>`
           : c ? `<p class="small">${esc(p.fit.summary || "")}</p>
               ${c.blockers.length ? `<p class="small err-text">⛔ 지원 조건 불일치: ${c.blockers.map(esc).join(", ")}</p>` : ""}
@@ -821,6 +823,7 @@ function renderPostingDetail(id) {
     <div class="po-title">
       <h2>${esc(p.title || "제목 없음")}</h2>
       <p class="muted">${[p.company, p.location, p.career, p.education, p.employmentType, p.salary].filter(Boolean).map(esc).join(" · ")}</p>
+      ${cmCommuteRowHTML(p)}
       <div class="chips" style="margin-top:6px">
         ${d ? `<span class="chip ${d.kind}">마감 ${esc(p.deadline)} · ${esc(d.text)}</span>` : p.deadlineText ? `<span class="chip">${esc(p.deadlineText)}</span>` : ""}
         ${stale ? `<span class="chip warn">이력서가 바뀌었습니다</span>` : ""}

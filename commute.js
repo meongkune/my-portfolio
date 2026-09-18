@@ -63,6 +63,19 @@ function cmRouteUrl(destName, destLat, destLng) {
   return `https://m.map.kakao.com/scheme/route?${parts.join("&")}`;
 }
 
+/* 공고 검색 프롬프트에 끼워 넣을 통근 조건.
+   통근 기능과 공고 검색이 따로 놀지 않게 하는 연결 고리입니다 —
+   검색 단계에서 이미 걸러 오면, 화면에서 거르는 것보다 결과가 훨씬 낫습니다.
+   집 설정이 없으면 빈 문자열을 돌려주어 프롬프트가 그대로 동작합니다. */
+function cmSearchHint() {
+  const h = cmHome();
+  if (!h.station) return "";
+  const lines = [`- 집에서 가까운 역: ${h.station} (통근 시간이 이 사람에게 가장 중요한 조건입니다)`];
+  lines.push(`- search_subway_info 를 stationName="${h.station}", maxTimeMinutes=${CM_BANDS[1]}, maxTransfers=1 로 호출해 통근 범위 안의 역 코드를 얻고, search_saramin_jobs 의 subwayCodes 에 넣어 그 범위 안의 공고를 우선 찾아 주세요.`);
+  lines.push(`- 범위 안에서 충분히 못 찾으면 maxTimeMinutes=${CM_BANDS[2]} 로 넓혀서 다시 찾습니다.`);
+  return lines.join("\n");
+}
+
 /* ---------- 집 위치·통근 범위 알아내기 ---------- */
 function cmHomePrompt(address) {
   return `아래 주소를 기준으로 통근 정보를 알아봐 주세요.
@@ -209,4 +222,21 @@ function commuteAction(act, btn) {
     return true;
   }
   return false;
+}
+
+/* 공고 상세에 붙는 통근 한 줄. 배지 + 실제 경로로 가는 링크.
+   링크는 집 좌표를 이미 들고 있으므로 출발지를 다시 칠 필요가 없습니다 —
+   원래 네이버지도에 출발·도착을 매번 입력하던 일을 없애는 것이 목적입니다. */
+function cmCommuteRowHTML(p) {
+  const h = cmHome();
+  if (!h.address && !h.station) return "";
+  const where = p.station || p.location || p.company;
+  if (!where) return "";
+  const band = cmBandOf(p.station || p.location);
+  return `
+    <div class="cm-row">
+      ${band !== null ? cmBadgeHTML(p.station || p.location) : `<span class="cm-badge cm-b3">🚇 범위 밖</span>`}
+      <span class="muted small">집(${esc(h.station || h.address)}) 기준</span>
+      <a class="btn btn-sm" href="${esc(cmRouteUrl(where))}" target="_blank" rel="noopener noreferrer">경로 보기 ↗</a>
+    </div>`;
 }
