@@ -166,6 +166,7 @@ const MENUS = [
   { id: "home", label: "현황", icon: "◆", group: "", render: renderHome },
   { id: "resume", label: "이력서", icon: "▤", group: "준비", render: renderResume },
   { id: "postings", label: "채용공고", icon: "▶", group: "지원", render: renderPostings },
+  { id: "commute", label: "통근", icon: "⇄", group: "", render: renderCommute },
   { id: "cover", label: "자소서", icon: "✎", group: "", render: renderCover },
   { id: "calendar", label: "일정", icon: "▦", group: "", render: renderCalendar },
   { id: "interview", label: "면접 준비", icon: "◇", group: "", render: renderInterview },
@@ -268,7 +269,7 @@ document.addEventListener("click", (ev) => {
   const act = btn.dataset.act;
   if (act === "me-edit") return meDialog();
   if (act === "setup") return clSetupDialog();
-  if (resumeAction(act, btn) || postingsAction(act, btn) || coverAction(act, btn) || calendarAction(act, btn) || interviewAction(act, btn)) ev.preventDefault();
+  if (resumeAction(act, btn) || postingsAction(act, btn) || coverAction(act, btn) || calendarAction(act, btn) || interviewAction(act, btn) || commuteAction(act, btn)) ev.preventDefault();
 });
 
 document.addEventListener("keydown", (ev) => {
